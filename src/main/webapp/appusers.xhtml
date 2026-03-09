@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core">
+<h:head>
+    <title>Lab AppUser - Hantering</title>
+</h:head>
+<h:body>
+    <h2>Registrera ny användare</h2>
+    <h:form id="userForm">
+        <h:panelGrid columns="2">
+            <h:outputLabel value="Användarnamn:"/>
+            <h:inputText id="username" value="#{appUserBean.username}" required="true"/>
+
+            <h:outputLabel value="Lösenord:"/>
+            <h:inputSecret id="password" value="#{appUserBean.password}" required="true"/>
+
+            <h:commandButton value="Spara" action="#{appUserBean.save}">
+                <f:ajax execute="@form" render="userTable userForm"/>
+            </h:commandButton>
+        </h:panelGrid>
+    </h:form>
+
+    <hr/>
+
+    <h2>Registrerade användare</h2>
+    <h:dataTable id="userTable" value="#{appUserBean.allUsers}" var="user">
+        <h:column>
+            <f:facet name="header">ID</f:facet>
+            #{user.id}
+        </h:column>
+        <h:column>
+            <f:facet name="header">Användarnamn</f:facet>
+            #{user.username}
+        </h:column>
+    </h:dataTable>
+</h:body>
+</html>
