@@ -23,4 +23,11 @@ public class AppUserService {
     public List<AppUser> getAllUsers() {
         return appUserRepository.findAll();
     }
+
+    public AppUser login(String username, String password) {
+        return appUserRepository.findByUsername(username)
+                .filter(user -> user.getPassword().equals(password))
+                .orElse(null);
+    }
+
 }
