@@ -4,19 +4,19 @@
       xmlns:h="jakarta.faces.html"
       xmlns:f="jakarta.faces.core">
 <h:head>
-    <title>Lab AppUser - Hantering</title>
+    <title>Lab AppUser - Management</title>
 </h:head>
 <h:body>
-    <h2>Registrera ny användare</h2>
+    <h2>Register new user</h2>
     <h:form id="userForm">
         <h:panelGrid columns="2">
-            <h:outputLabel value="Användarnamn:"/>
+            <h:outputLabel value="Username:"/>
             <h:inputText id="username" value="#{appUserBean.username}" required="true"/>
 
-            <h:outputLabel value="Lösenord:"/>
+            <h:outputLabel value="Password:"/>
             <h:inputSecret id="password" value="#{appUserBean.password}" required="true"/>
 
-            <h:commandButton value="Spara" action="#{appUserBean.save}">
+            <h:commandButton value="Save" action="#{appUserBean.save}">
                 <f:ajax execute="@form" render="userTable userForm"/>
             </h:commandButton>
         </h:panelGrid>
@@ -24,16 +24,17 @@
 
     <hr/>
 
-    <h2>Registrerade användare</h2>
+    <h2>Registered users</h2>
     <h:dataTable id="userTable" value="#{appUserBean.allUsers}" var="user">
         <h:column>
             <f:facet name="header">ID</f:facet>
             #{user.id}
         </h:column>
         <h:column>
-            <f:facet name="header">Användarnamn</f:facet>
+            <f:facet name="header">Username</f:facet>
             #{user.username}
         </h:column>
     </h:dataTable>
+    <p>Go to <h:link value="Login page" outcome="login"/></p>
 </h:body>
 </html>
