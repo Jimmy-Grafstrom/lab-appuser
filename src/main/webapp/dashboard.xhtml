@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core">
+<h:head>
+    <title>Dashboard - AppUser</title>
+    <style>
+        #chatContainer {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            max-width: 500px;
+        }
+        #chatLog {
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 200px;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+            margin-bottom: 10px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .status-connected { color: green; font-weight: bold; }
+        .status-disconnected { color: red; font-weight: bold; }
+    </style>
+</h:head>
+<h:body>
+    <h:panelGroup rendered="#{loginBean.loggedIn}">
+        <h2>Welcome, #{loginBean.loggedInUser.username}!</h2>
+        <p>You are now logged into the system.</p>
+        
+        <hr/>
+        
+        <div id="chatContainer">
+            <h3>Real-time Chat</h3>
+            <p>Status: <span id="status" class="status-disconnected">DISCONNECTED</span></p>
+            
+            <div id="chatLog"></div>
+            
+            <div style="display: flex; gap: 5px;">
+                <input id="chatInput" type="text" placeholder="Type a message..." style="flex-grow: 1;"/>
+                <button type="button" onclick="sendChatMessage()">Send</button>
+            </div>
+        </div>
+
+        <hr/>
+
+        <h:form>
+            <h:commandButton value="Logout" action="#{loginBean.logout}"/>
+        </h:form>
+
+        <script>
+            // URL matches the separate websocket-server application
+            const wsUrl = "ws://localhost:8080/websocket-server/ws/chat";
+            let socket;
+
+            function connect() {
+                socket = new WebSocket(wsUrl);
+                const statusEl = document.getElementById("status");
+                const logEl = document.getElementById("chatLog");
+                const inputEl = document.getElementById("chatInput");
+
+                socket.onopen = () => {
+                    statusEl.textContent = "CONNECTED";
+                    statusEl.className = "status-connected";
+                    logEl.innerHTML += "<em>[System] Connected to chat server</em>\n";
+                };
+
+                socket.onmessage = (event) => {
+                    logEl.textContent += event.data + "\n";
+                    logEl.scrollTop = logEl.scrollHeight; // Auto-scroll to bottom
+                };
+
+                socket.onclose = () => {
+                    statusEl.textContent = "DISCONNECTED";
+                    statusEl.className = "status-disconnected";
+                    logEl.innerHTML += "<em>[System] Connection lost. Trying to reconnect...</em>\n";
+                    setTimeout(connect, 3000); // Attempt to reconnect
+                };
+
+                socket.onerror = (error) => {
+                    console.error("WebSocket Error: ", error);
+                };
+            }
+
+            function sendChatMessage() {
+                const inputEl = document.getElementById("chatInput");
+                const msg = inputEl.value.trim();
+                if (msg &amp;&amp; socket &amp;&amp; socket.readyState === WebSocket.OPEN) {
+                    // Send message prefixed with the username from LoginBean
+                    socket.send("#{loginBean.loggedInUser.username}: " + msg);
+                    inputEl.value = "";
+                }
+            }
+
+            // Allow sending with 'Enter' key
+            document.getElementById("chatInput").addEventListener("keypress", function(event) {
+                if (event.key === "Enter") {
+                    sendChatMessage();
+                    event.preventDefault();
+                }
+            });
+
+            // Initial connection
+            connect();
+        </script>
+    </h:panelGroup>
+
+    <h:panelGroup rendered="#{not loginBean.loggedIn}">
+        <h2>Access Denied</h2>
+        <p>You must be logged in to view this page.</p>
+        <h:link value="Back to Login" outcome="login"/>
+    </h:panelGroup>
+</h:body>
+</html>
